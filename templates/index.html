@@ -1,0 +1,21 @@
+{% load static %}
+<html>
+	<head>
+		<title>Cherry-picker</title>
+<!--		<script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+		<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+		<script src="https://unpkg.com/babel-standalone@6/babel.min.js" crossorigin></script>
+-->
+		<link rel="stylesheet" href="{% static 'index.css' %}">
+	</head>
+	<body>
+		<div id="root">
+		</div>
+		<div id="upload">
+		<input type="file" name="input_log_file" id="log_file" value="Select file">
+		<button id="upload_btn">Upload!</button>
+		<input type="hidden" value="{% static baseUrl %}" id="baseUrl">
+		</div>
+		<script type="module" src="{% static 'index.js' %}"></script>
+	</body>
+</html>
