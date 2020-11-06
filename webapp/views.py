@@ -9,8 +9,9 @@ import pm4py
 import json
 import dateutil.parser
 from django.core.serializers.json import DjangoJSONEncoder
-from celery import Celery
-from celery.schedules import crontab
+import glob
+#from celery import Celery
+#from celery.schedules import crontab
 #pm4py imports
 from pm4py.objects.log.importer.xes import importer as xes_importer
 from pm4py.algo.discovery.heuristics import algorithm as heuristics_miner
@@ -27,6 +28,8 @@ sessions = {}
 def index(req):
 	req.session["id"] = hashlib.sha256(bytes(str(req.META["REMOTE_ADDR"]) + str(datetime.now()), 'utf-8')).hexdigest()
 	req.session.set_expiry(7200)
+	test()
+	delete_old_files()
 	return render(req, "index.html", {"baseUrl": req.session["id"]})
 
 def check_session_id_or_redirect(func):
@@ -43,7 +46,7 @@ def check_session_id_or_redirect(func):
 def upload_log(req):
 	input_log_file = req.FILES["input_log_file"]
 	sessions[req.session["id"]] = datetime.now()
-	req.session.set_expiry(7200)
+	req.session.set_expiry(7200) #7200 = 2hrs
 	subprocess.call(["rm", "-f", req.session["id"] + "_*"])
 	with open(os.path.join("webapp","static", req.session["id"] + "_l0.xes"), 'wb') as file:
 		file.write(input_log_file.read())
@@ -245,21 +248,31 @@ def apply_filter(req):
 	return response
 
 #@periodic_task(run_every=crontab(minute='*/5'))
-app = Celery()
+#app = Celery()
 
-@app.on_after_configure.connect
-def setup_periodic_tasks(sender, **kwargs):
-	sender.add_periodic_task(crontab(minute=0,hour="*/2"), delete_old_files.s())
+#@app.on_after_configure.connect
+#def setup_periodic_tasks(sender, **kwargs):
+#	sender.add_periodic_task(10, delete_old_files.s()) #minute=0, hour=*/2
+#	sender.add_periodic_task(10,test.s())
 
-@app.task
+#@app.task
+def test():
+	print("here")
+
+#@app.task
 def delete_old_files():
+	#print(sessions.keys())
 	del_list = []
 	for user_id in sessions.keys() :
 		# If the expiration date is bigger than now delete it
-		if sessions[user_id] + timedelta(seconds=8000) < datetime.now():
+		if sessions[user_id] + timedelta(seconds=8000) < datetime.now(): #8000
 			del_list.append(user_id)
 	for element in del_list:
-		subprocess.call(["rm", "-f", element + "_*"])
+		print("deleting " + element)
+		#subprocess.call(["ls", "-la"])
+		files_to_delete = glob.glob(os.path.join("webapp", "static", element + "_*"))
+		for file in files_to_delete:
+			subprocess.call(["rm", "-f", file])
 		del sessions[element]
 	return "completed deleting file at {}".format(datetime.now())
 
