@@ -28,7 +28,6 @@ sessions = {}
 def index(req):
 	req.session["id"] = hashlib.sha256(bytes(str(req.META["REMOTE_ADDR"]) + str(datetime.now()), 'utf-8')).hexdigest()
 	req.session.set_expiry(7200)
-	test()
 	delete_old_files()
 	return render(req, "index.html", {"baseUrl": req.session["id"]})
 
@@ -254,10 +253,6 @@ def apply_filter(req):
 #def setup_periodic_tasks(sender, **kwargs):
 #	sender.add_periodic_task(10, delete_old_files.s()) #minute=0, hour=*/2
 #	sender.add_periodic_task(10,test.s())
-
-#@app.task
-def test():
-	print("here")
 
 #@app.task
 def delete_old_files():
