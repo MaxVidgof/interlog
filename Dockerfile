@@ -3,7 +3,7 @@ FROM python:3.6
 FROM python:3.6
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends nano graphviz \
+    && apt-get install -y --no-install-recommends nano graphviz libgirepository1.0-dev \
     && rm -rf /var/lib/apt/lists/*
 
 

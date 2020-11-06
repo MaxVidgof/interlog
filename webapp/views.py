@@ -53,7 +53,6 @@ def upload_log(req):
 	log = xes_importer.apply(input_file)
 	heu_net = heuristics_miner.apply_heu(log, parameters={"dependency_thresh": 0.99})
 	gviz = hn_vis_factory.apply(heu_net)
-	hn_vis_factory.view(gviz)
 	hn_vis_factory.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l0.png"))
 	#Find minimum and maximum timestamps
 	start_time = min([event["time:timestamp"] for trace in log for event in trace])
@@ -218,7 +217,6 @@ def apply_filter(req):
 
 	heu_net = heuristics_miner.apply_heu(new_log, parameters={"dependency_thresh": 0.99})
 	gviz = hn_vis_factory.apply(heu_net)
-	hn_vis_factory.view(gviz)
 	#subprocess.call(["rm", "-f", req.session["id"] + "_l1*"])
 	hn_vis_factory.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l1.png"))
 	#print("Saved l1 model as " + req.session["id"] + "_l1.xes")
@@ -232,7 +230,6 @@ def apply_filter(req):
 			not_filtered_log.append(trace)
 	heu_net = heuristics_miner.apply_heu(not_filtered_log, parameters={"dependency_thresh": 0.99})
 	gviz = hn_vis_factory.apply(heu_net)
-	hn_vis_factory.view(gviz)
 	hn_vis_factory.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l2.png"))
 	xes_exporter.apply(not_filtered_log, os.path.join("webapp","static", req.session["id"] + "_l2.xes"))
 

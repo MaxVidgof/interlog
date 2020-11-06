@@ -15,12 +15,13 @@
 	<body>
 	<div class="container-fluid">
 		<div id="root" class="row">
+			<div id="upload" class="input">
+			<input type="file" name="input_log_file" id="log_file" value="Select file">
+			<button id="upload_btn" class="btn btn-primary">Upload!</button>
+			<input type="hidden" value="{% static baseUrl %}" id="baseUrl">
+			</div>
 		</div>
-		<div id="upload">
-		<input type="file" name="input_log_file" id="log_file" value="Select file">
-		<button id="upload_btn">Upload!</button>
-		<input type="hidden" value="{% static baseUrl %}" id="baseUrl">
-		</div>
+
 	</div>
 	<!-- The Modal -->
 	<div id="modal" class="modal">
