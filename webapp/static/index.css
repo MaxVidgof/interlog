@@ -1,12 +1,149 @@
 * {
-	border: 1px solid black;
+//	border: 1px solid black;
 }
 img {
-	width: 100%;
+	max-height: 90%;
+	max-width: 100%;
+	display: block
 }
 button {
 	text-align: center;
 	text-decoration: none;
 	display: inline-block;
 	font-size: 16px;
+}
+
+.col-sm {
+	padding: 0px;
+	border-left: 2px solid black;
+}
+
+.form-group {
+	margin: 0px;
+}
+
+.btn-light {
+	max-height: 10%;
+	border-color: black;
+}
+
+#root {
+	height: 100%
+}
+
+#model_0 {
+	width: 100%;
+	height: 100%;
+}
+
+#model_1 {
+	background-color: green;
+	width: 100%;
+	height: 50%;
+}
+
+#model_2 {
+	background-color: red;
+	width: 100%;
+	height: 50%
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+
+/* Modal Content (Image) */
+.modal-content {
+  margin: auto;
+  display: block;
+}
+
+/* Add Animation - Zoom in the Modal */
+.modal-content, #caption {
+  animation-name: zoom;
+  animation-duration: 0.6s;
+}
+
+@keyframes zoom {
+  from {transform:scale(0)}
+  to {transform:scale(1)}
+}
+
+/* The Close Button */
+.close {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 100% Image Width on Smaller Screens */
+@media only screen and (max-width: 700px){
+  .modal-content {
+    width: 100%;
+  }
+}
+
+input[type=range] {
+    pointer-events: none;
+//    position: absolute;
+    overflow: hidden;
+    left: 0;
+//    top: 15px;
+    width: 200px;
+    outline: none;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    pointer-events: all;
+    position: relative;
+    z-index: 1;
+    outline: 0;
+}
+
+input[type=range]::-moz-range-thumb {
+    pointer-events: all;
+    position: relative;
+    z-index: 10;
+    -moz-appearance: none;
+    width: 9px;
+}
+
+input[type=range]::-moz-range-track {
+    position: relative;
+    z-index: -1;
+    background-color: rgba(0, 0, 0, 1);
+    border: 0;
+}
+input[type=range]:last-of-type::-moz-range-track {
+    -moz-appearance: none;
+    background: none transparent;
+    border: 0;
+}
+input[type=range]::-moz-focus-outer {
+  border: 0;
 }

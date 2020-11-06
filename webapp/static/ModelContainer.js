@@ -3,16 +3,22 @@ import Component from './Component.js';
 export default class ModelContainer extends Component{
 	constructor(baseUrl, index){
 		super()
+//                this.div = document.createElement('div');
+		if (index===0) {this.root.setAttribute('class', 'col-sm')}
+		this.root.setAttribute('id', `model_${index}`);
 		this.img = document.createElement("img")
 		this.img_src = `${baseUrl}_l${index}.png`
 		this.img.src = this.img_src
+		this.img.alt = "Mined model"
 		this.downloadBtn = document.createElement("a")
 		this.downloadBtn.innerText = "download log"
 		this.downloadBtn.href = `${baseUrl}_l${index}.xes`
 		this.downloadBtn.download = `l${index}.xes`
+		this.downloadBtn.setAttribute('class', 'btn btn-light float-right');
 
-		this.root.appendChild(this.img)
 		this.root.appendChild(this.downloadBtn)
+		this.root.appendChild(this.img)
+//		this.root.appendChild(this.div)
 	}
 
 	render(parent){

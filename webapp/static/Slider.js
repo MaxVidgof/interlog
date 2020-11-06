@@ -1,62 +1,121 @@
 import Component from './Component.js';
  
 export default class Slider extends Component {
-	constructor(onDeletePressed, onChange, type) {
+	constructor(onDeletePressed, onChange, type, start, end) {
 		super();
-		this.div = document.createElement('div');
+		this.type = type
+//		this.div = document.createElement('div');
 		this.id = Date.now();
-		this.div.setAttribute('id', this.id);
-		this.root.appendChild(this.div);
+		this.root.setAttribute('id', this.id);
+		this.root.setAttribute('class','form-group')
+//		this.root.appendChild(this.div);
 		this.onChange = onChange
 		this.deleteBtn = document.createElement('button');
 		this.deleteBtn.innerText = '-';
 		this.deleteBtn.addEventListener('click', () => {onDeletePressed(this);});
-		this.div.appendChild(this.deleteBtn);
+		this.root.appendChild(this.deleteBtn);
+		if (type==="datetime-local" && start !== undefined && end !== undefined){
+			this.min = start;
+			this.max = end;
+		} else {
+			this.min = 0;
+			this.max = 1;
+		}
 		this.leftInput = document.createElement('input');
-		this.leftInput.required=true;
-		if (type=="number") {
-			this.leftInput.type = "number";
-			this.leftInput.min = 0;
-			this.leftInput.max = 1;
-			this.leftInput.step = 0.01;
-		} else if (type=="datetime-local") {
-			this.leftInput.type = "datetime-local"
-			this.leftInput.min = undefined;
-		}
-		this.leftInput.value = this.leftInput.min;
-		this.div.appendChild(this.leftInput);
+		this.createField(this.leftInput, 'left');
 		this.rightInput = document.createElement('input');
-		this.rightInput.required=true;
-		if (type=="number") {
-			this.rightInput.type = "number";
-			this.rightInput.min = 0;
-			this.rightInput.max = 1;
-			this.rightInput.step = 0.01;
-		} else if (type=="datetime-local") {
-			this.rightInput.type = "datetime-local"
-			this.rightInput.max = undefined;
-		}
-		this.rightInput.setAttribute('value', this.rightInput.max);
-		this.div.appendChild(this.rightInput);
+		this.createField(this.rightInput, 'right');
+
+		this.leftSlider = document.createElement('input');
+		this.createSlider(this.leftSlider, 'left');
+		this.rightSlider = document.createElement('input');
+		this.createSlider(this.rightSlider, 'right');
 		// slider
-		this.left = "";
-		this.right = "";
-		this.leftInput.addEventListener('input', (evt) => {this.left = this.leftInput.value});
-		this.rightInput.addEventListener('input', (evt) => this.right = this.rightInput.value);
+		this.left = this.leftInput.min;
+		this.right = this.rightInput.max;
+		console.log(this.leftInput)
+		this.leftInput.addEventListener('change', (evt) => {this.left = this.leftInput.value});
+		this.rightInput.addEventListener('change', (evt) => this.right = this.rightInput.value);
+		this.leftSlider.addEventListener('change', (evt) => this.left =this.leftSlider.value);
+		this.rightSlider.addEventListener('change', (evt) => this.right = this.rightSlider.value);
+
 	}
  
 	set left(val) {
-		this.leftInput.value = val;
+		if (this.type=='datetime-local') {
+			if (!isNaN(val)) {
+				this.leftInput.value = (new Date((new Date(this.min+"Z")).getTime()+(this.leftSlider.value * 1))).toISOString().split("Z")[0].split(".")[0].replace("T", " ");
+				this.leftSlider.value = val;
+			} else {
+				this.leftInput.value = val;
+				this.leftSlider.value = (new Date(val+"Z")) - (new Date(this.min));
+			}
+		} else {
+			this.leftInput.value = val;
+			this.leftSlider.value = val;
+		}
 //		this.left = val;
 		this.onChange()
 		// slider
 	}
  
 	set right(val) {
+		if (this.type=='datetime-local') {
+			if(!isNaN(val)) {
+				this.rightInput.value = (new Date((new Date(this.min+"Z")).getTime()+(this.rightSlider.value * 1))).toISOString().split("Z")[0].split(".")[0].replace("T", " ");
+				this.rightSlider.value = val;
+			} else {
+				this.rightInput.value = val;
+				this.rightSlider.value = (new Date(val+"Z")) - (new Date(this.min));
+			}
+		} else {
+			this.rightInput.value = val;
+			this.rightSlider.value = val;
+		}
+
 		this.onChange()
-		this.rightInput.value = val;
 //		this.right = val;
 		// slider
 	}
- 
+	createField(field, side){
+		field.required=true;
+		field.min = this.min;
+console.log(field.min)
+		field.max = this.max;
+
+		if (this.type==="number") {
+			field.type = "number";
+			field.step = 0.01;
+		} else if (this.type==="datetime-local") {
+			field.type = "text" //"datetime-local"
+			field.setAttribute('class', "datetimeInput");
+			field.setAttribute('id', `${this.id}_${side}`);
+		}
+		field.value = (side==="left" ? field.min : field.max);
+		this.root.appendChild(field);
+	}
+	createSlider(field, side) {
+		field.type = "range";
+		field.min = 0;
+		if (this.type==="number"){
+			field.max = 1;
+			field.step = 0.05;
+			field.value = eval("this."+side+"Input.value");
+		} else if (this.type==="datetime-local"){
+			field.max = (new Date(this.max+"Z")) - (new Date(this.min+"Z"))
+			field.step = (field.max - field.min)/50
+			field.value = (new Date(eval("this."+side+"Input.value"))) - (new Date(this.min+"Z"))
+		}
+		this.root.appendChild(field);
+	}
+	render(parent) {
+		super.render(parent)
+		if(this.type==="datetime-local") {
+			AnyTime.noPicker(`${this.id}_left`)
+			AnyTime.picker( `${this.id}_left`, { format: "%Y-%m-%d %H:%i:%s", firstDOW: 1 } );
+			AnyTime.noPicker(`${this.id}_right`)
+			AnyTime.picker( `${this.id}_right`, { format: "%Y-%m-%d %H:%i:%s", firstDOW: 1 } ); //%: for timezone
+		}
+	}
+
 }
