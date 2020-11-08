@@ -56,7 +56,7 @@ def upload_log(req):
 	hn_vis_factory.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l0.png"))
 	#Find minimum and maximum timestamps
 	start_time = min([event["time:timestamp"] for trace in log for event in trace])
-	end_time = max([event["time:timestamp"] for trace in log for event in trace])
+	end_time = max([event["time:timestamp"] for trace in log for event in trace]) + timedelta(seconds=1)
 	response = HttpResponse(json.dumps({'start_time': start_time, 'end_time': end_time}, sort_keys=True, indent=1, cls=DjangoJSONEncoder))
 	response.status_code = 200
 	return response
