@@ -4,9 +4,9 @@ stages:
   - publishImageConfig:
       dockerfilePath: ./Dockerfile
       buildContext: .
-      tag: registry.ai.wu.ac.at/vidgof/cherry-picker
+      tag: registry.ai.wu.ac.at/vidgof/cherry-picker:latest
       pushRemote: true
-      registry: https://registry.ai.wu.ac.at
+      registry: registry.ai.wu.ac.at
 - name: deploy
   steps:
   - applyYamlConfig:
