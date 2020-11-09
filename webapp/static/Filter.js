@@ -33,7 +33,7 @@ export default class Filter extends Component{
 			return slider.id !== deletedSlider.id
 		})
 		//console.log(this.sliders.length)
-		document.getElementById(deletedSlider.id).parentElement.remove();
+		document.getElementById(deletedSlider.id).remove();
 		//this.root.removeChild(deletedSlider);
 	}
 
