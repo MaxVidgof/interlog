@@ -13,7 +13,7 @@ button.addEventListener("click", () => {
 	if(input.files.length>0){
 		let data = new FormData()
 		data.append('input_log_file', input.files[0])
-		fetch("http://10.139.167.139:8000/upload", {method: 'POST', body: data}).then((response) => {return response.json()}).then((data) => {
+		fetch("https://cherry-picker.cluster.ai.wu.ac.at/upload", {method: 'POST', body: data}).then((response) => {return response.json()}).then((data) => {
 
 if (data.status && data.status==="expired"){ window.location.reload(); }
 

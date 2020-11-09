@@ -32,7 +32,7 @@ export default class FilterContainer extends Component{
 //if (filtersOk) {
 let data = JSON.stringify(this.filterSettings)
 //                data.append('input_log_file', input.files[0])
-	                fetch("http://10.139.167.139:8000/apply", {method: 'POST', body: data}).then((response => {return response.json()})).then((data) => {
+	                fetch("https://cherry-picker.cluster.ai.wu.ac.at/apply", {method: 'POST', body: data}).then((response => {return response.json()})).then((data) => {
 //console.log(data)
 				if (data.status && data.status==="expired"){ alert("Session expired. Please reload the page.");}
 				console.log("Time filter: " + data.time + " seconds")
