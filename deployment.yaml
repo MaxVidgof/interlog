@@ -24,14 +24,14 @@ spec:
         workload.user.cattle.io/workloadselector: deployment-django-cherry-picker
     spec:
       containers:
-      - env:
-        - name: GIT-COMMIT
-          value: ${CICD_GIT_COMMIT}
       - command:
         - python
         - manage.py
         - runserver
         - 0.0.0.0:8000
+        env:
+        - name: GIT-COMMIT
+          value: ${CICD_GIT_COMMIT
         image: registry.ai.wu.ac.at/vidgof/cherry-picker
         imagePullPolicy: Always
         name: cherry-picker
