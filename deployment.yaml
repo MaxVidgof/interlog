@@ -24,6 +24,9 @@ spec:
         workload.user.cattle.io/workloadselector: deployment-django-cherry-picker
     spec:
       containers:
+      - env:
+        - name: GIT-COMMIT
+          value: ${CICD_GIT_COMMIT}
       - command:
         - python
         - manage.py
