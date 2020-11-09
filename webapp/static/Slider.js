@@ -25,7 +25,7 @@ export default class Slider extends Component {
 		this.createField(this.leftInput, 'left');
 		this.rightInput = document.createElement('input');
 		this.createField(this.rightInput, 'right');
-
+		this.root.appendChild(document.createElement('br'));
 		this.leftSlider = document.createElement('input');
 		this.createSlider(this.leftSlider, 'left');
 		this.rightSlider = document.createElement('input');
