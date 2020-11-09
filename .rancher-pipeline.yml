@@ -1,0 +1,11 @@
+stages:
+- name: build
+  steps:
+  - publishImageConfig:
+      dockerfilePath: ./Dockerfile
+      buildContext: .
+      tag: registry.ai.wu.ac.at/vidgof/cherry-picker
+      pushRemote: true
+      registry: https://registry.ai.wu.ac.at
+timeout: 60
+notification: {}
