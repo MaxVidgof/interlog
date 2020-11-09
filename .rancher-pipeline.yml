@@ -7,5 +7,9 @@ stages:
       tag: registry.ai.wu.ac.at/vidgof/cherry-picker
       pushRemote: true
       registry: https://registry.ai.wu.ac.at
+- name: deploy
+  steps:
+  - applyYamlConfig:
+      path: ./deployment.yaml
 timeout: 60
 notification: {}
