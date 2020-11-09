@@ -33,7 +33,6 @@ export default class Slider extends Component {
 		// slider
 		this.left = this.leftInput.min;
 		this.right = this.rightInput.max;
-		console.log(this.leftInput)
 		this.leftInput.addEventListener('change', (evt) => {this.left = this.leftInput.value});
 		this.rightInput.addEventListener('change', (evt) => this.right = this.rightInput.value);
 		this.leftSlider.addEventListener('change', (evt) => this.left =this.leftSlider.value);
@@ -80,7 +79,6 @@ export default class Slider extends Component {
 	createField(field, side){
 		field.required=true;
 		field.min = this.min;
-console.log(field.min)
 		field.max = this.max;
 
 		if (this.type==="number") {
