@@ -20,7 +20,8 @@ from pm4py.algo.filtering.log.variants import variants_filter
 from pm4py.algo.filtering.log.timestamp import timestamp_filter
 from pm4py.statistics.traces.log import case_statistics
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
-
+from pm4py.algo.discovery.dfg import algorithm as dfg_discovery
+from pm4py.visualization.dfg import visualizer as dfg_visualization
 
 #TODO: users map for garbage collection
 sessions = {}
@@ -94,6 +95,7 @@ def apply_filter(req):
 	if o["filter3"] == []:
 		filters["activities"] = False
 		#custom_activitiy_range = [(0,1)] #filter3
+	selected_viz = o["visualization"]
 	input_file = os.path.join("webapp","static", req.session["id"] + "_l0.xes")
 	input_log = xes_importer.apply(input_file)
 	not_filtered_logs = {}
@@ -215,11 +217,15 @@ def apply_filter(req):
 
 	time_activities_finished = datetime.now()
 
-	heu_net = heuristics_miner.apply_heu(new_log, parameters={"dependency_thresh": 0.99})
-	gviz = hn_vis_factory.apply(heu_net)
-	#subprocess.call(["rm", "-f", req.session["id"] + "_l1*"])
-	hn_vis_factory.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l1.png"))
-	#print("Saved l1 model as " + req.session["id"] + "_l1.xes")
+	if(selected_viz=="dfg"):
+		dfg = dfg_discovery.apply(new_log)
+		gviz = dfg_visualization.apply(dfg, log=new_log, variant=dfg_visualization.Variants.FREQUENCY)
+		dfg_visualization.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l1.png"))
+	else:
+		heu_net = heuristics_miner.apply_heu(new_log, parameters={"dependency_thresh": 0.99})
+		gviz = hn_vis_factory.apply(heu_net)
+		hn_vis_factory.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l1.png"))
+
 	xes_exporter.apply(new_log, os.path.join("webapp","static", req.session["id"] + "_l1.xes"))
 
 
@@ -228,9 +234,15 @@ def apply_filter(req):
 	for part in not_filtered_logs.keys():
 		for trace in not_filtered_logs[part]:
 			not_filtered_log.append(trace)
-	heu_net = heuristics_miner.apply_heu(not_filtered_log, parameters={"dependency_thresh": 0.99})
-	gviz = hn_vis_factory.apply(heu_net)
-	hn_vis_factory.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l2.png"))
+
+	if(selected_viz==="dfg"):
+		dfg = dfg_discovery.apply(not_filtered_log)
+		gviz = dfg_visualization.apply(dfg, log=not_filtered_log, variant=dfg_visualization.Variants.FREQUENCY)
+		dfg_visualization.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l2.png"))
+	else:
+		heu_net = heuristics_miner.apply_heu(not_filtered_log, parameters={"dependency_thresh": 0.99})
+		gviz = hn_vis_factory.apply(heu_net)
+		hn_vis_factory.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l2.png"))
 	xes_exporter.apply(not_filtered_log, os.path.join("webapp","static", req.session["id"] + "_l2.xes"))
 
 	used_paths = 0

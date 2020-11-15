@@ -9,11 +9,38 @@ export default class FilterContainer extends Component{
 		this.filterSettings = {
 			filter1: [],
 			filter2: [],
-			filter3: []
+			filter3: [],
+			visualization: "heu"
 		}
 		this.filter1 = new Filter(this.setFilter1.bind(this), "Time filter", "datetime-local", start, end);
 		this.filter2 = new Filter(this.setFilter2.bind(this), "Variants filter", "number");
 		this.filter3 = new Filter(this.setFilter3.bind(this), "Activities filter", "number");
+
+		this.viz = document.createElement("div");
+		this.viz.setAttribute();
+		this.viz_head = document.createElement("h3");
+		this.viz_head.innerText = "Select visualization";
+		this.viz.appendChild(this.viz_head);
+		this.viz.appendChild(document.createElement("br"));
+		this.viz_dfg = document.createElement("input");
+		this.viz_dfg.type="radio";
+		this.viz_dfg.setAttribute('id', 'dfg');
+		this.viz.appendChild(this.viz_dfg);
+		this.l_dfg = document.createElement("label");
+		this.l_dfg.setAttribute("for", "dfg");
+		this.l_dfg.innerText = "Directly-follows-graph";
+		this.viz.appendChild(this.l_dfg);
+		this.viz.appendChild(document.createElement("br"));
+                this.viz_heu = document.createElement("input");
+                this.viz_heu.type="radio";
+                this.viz_heu.setAttribute('id', 'heu');
+		this.viz_heu.checked=true;
+                this.viz.appendChild(this.viz_heu);
+                this.l_heu = document.createElement("label");
+                this.l_heu.setAttribute("for", "heu");
+		this.l_heu.innerText = "Heuristics miner";
+                this.viz.appendChild(this.l_heu);
+
 
 		this.applyBtn = document.createElement("button");
 		this.applyBtn.innerText = "Apply";
@@ -30,6 +57,7 @@ export default class FilterContainer extends Component{
 //    }
 //}
 //if (filtersOk) {
+if (this.viz_dfg.checked) {this.filterSettings.visualization = "dfg"}
 let data = JSON.stringify(this.filterSettings)
 //                data.append('input_log_file', input.files[0])
 	                fetch("https://cherry-picker.cluster.ai.wu.ac.at/apply", {method: 'POST', body: data}).then((response => {return response.json()})).then((data) => {
@@ -49,6 +77,7 @@ console.log(this.filterSettings)
 //this.root.appendChild(this.filterX.render())
 		//
 		this.filters = document.createElement('div')
+		this.root.appendChild(this.viz)
 		this.root.appendChild(this.filters)
 		this.root.appendChild(this.applyBtn)
 	}
