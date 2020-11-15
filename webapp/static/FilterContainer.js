@@ -83,6 +83,7 @@ console.log(this.filterSettings)
 		//
 		this.filters = document.createElement('div')
 		this.root.appendChild(this.filters)
+		this.root.appendChild(this.viz)
 		this.root.appendChild(this.applyBtn)
 	}
 
@@ -101,6 +102,5 @@ console.log(this.filterSettings)
 		this.filter1.render(this.filters)
 		this.filter2.render(this.filters)
 		this.filter3.render(this.filters)
-		this.viz.render(this.filters)
 	}
 }
