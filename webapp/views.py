@@ -235,7 +235,7 @@ def apply_filter(req):
 		for trace in not_filtered_logs[part]:
 			not_filtered_log.append(trace)
 
-	if(selected_viz==="dfg"):
+	if(selected_viz=="dfg"):
 		dfg = dfg_discovery.apply(not_filtered_log)
 		gviz = dfg_visualization.apply(dfg, log=not_filtered_log, variant=dfg_visualization.Variants.FREQUENCY)
 		dfg_visualization.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l2.png"))
