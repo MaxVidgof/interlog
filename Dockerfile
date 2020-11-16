@@ -11,8 +11,10 @@ WORKDIR .
 COPY . .
 RUN pip install -r requirements.txt
 
-#RUN sed -i "s+10.139.167.139+`ip -4 -o address | grep eth0 | awk '{print $4}' | awk -F"/" '{print $1}'`+g" ./webapp/static/index.js
-#RUN sed -i "s+10.139.167.139+`ip -4 -o address | grep eth0 | awk '{print $4}' | awk -F"/" '{print $1}'`+g" ./webapp/static/FilterContainer.js
+#RUN sed -i "s+cherry-picker.cluster.ai.wu.ac.at+`ip -4 -o address | grep eth0 | awk '{print $4}' | awk -F"/" '{print $1}'`:8000+g" ./webapp/static/index.js
+#RUN sed -i "s+cherry-picker.cluster.ai.wu.ac.at+`ip -4 -o address | grep eth0 | awk '{print $4}' | awk -F"/" '{print $1}'`:8000+g" ./webapp/static/FilterContainer.js
+#RUN sed -i "s+https+http+g" ./webapp/static/index.js
+#RUN sed -i "s+https+http+g" ./webapp/static/FilterContainer.js
 
 EXPOSE 8000
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
