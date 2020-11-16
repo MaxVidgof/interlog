@@ -11,7 +11,7 @@ You can use the tool as a Docker container or just run it locally. Please follow
 In order to use InterLog in a Docker container, do the following:
 
 1. Clone this repository and `cd` into it
-2. Open the `Dockerfile` and uncomment line 14 to make it
+2. Open the `Dockerfile` and uncomment line 14 to make it look like this:
 ```
 RUN ./run_locally.sh
 ```
@@ -24,7 +24,7 @@ This process takes approximately 5 minutes
 ```
 docker run -p 8000:8000 interlog
 ```
-5. Go to `http://<your_docker_container_ip>:8080` in your browser
+5. Go to `http://<your_docker_container_ip>:8000` in your browser
 
  ### Locally on a linux machine
  
