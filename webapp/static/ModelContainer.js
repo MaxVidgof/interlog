@@ -10,13 +10,19 @@ export default class ModelContainer extends Component{
 		this.img_src = `${baseUrl}_l${index}.png`
 		this.img.src = this.img_src
 		this.img.alt = "Mined model"
+		this.top = document.createElement("div")
+		this.traceNumber = document.createElement("p")
+		this.traceNumber.innerText = "Traces: "
+		this.traceNumber.setAttribute('class', 'text-left float-left')
 		this.downloadBtn = document.createElement("a")
 		this.downloadBtn.innerText = "download log"
 		this.downloadBtn.href = `${baseUrl}_l${index}.xes`
 		this.downloadBtn.download = `l${index}.xes`
 		this.downloadBtn.setAttribute('class', 'btn btn-light float-right');
 
-		this.root.appendChild(this.downloadBtn)
+		this.top.appendChild(this.traceNumber)
+		this.top.appendChild(this.downloadBtn)
+		this.root.appendChild(this.top)
 		this.root.appendChild(this.img)
 //		this.root.appendChild(this.div)
 	}

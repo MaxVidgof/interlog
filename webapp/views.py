@@ -10,6 +10,8 @@ import json
 import dateutil.parser
 from django.core.serializers.json import DjangoJSONEncoder
 import glob
+import math
+from .lev import levenshteinDistanceDP as lev_dist
 #from celery import Celery
 #from celery.schedules import crontab
 #pm4py imports
@@ -68,6 +70,7 @@ def apply_filter(req):
 	filters = {
 		"time": True,
 		"variants": True,
+		"performance": True,
 		"activities": True
 	}
 	req.session.set_expiry(7200)
@@ -89,13 +92,20 @@ def apply_filter(req):
 	if o["filter2"] == []:
 		filters["variants"] = False
 		#custom_path_range = [(0,1)] #filter2
-	custom_activitiy_range = []
+	custom_performance_range = []
 	for pair in o["filter3"]:
-		custom_activitiy_range.append((float(pair[0]),float(pair[1])))
+		custom_performance_range.append((float(pair[0]),float(pair[1])))
 	if o["filter3"] == []:
+		filters["performance"] = False
+	custom_activitiy_range = []
+	for pair in o["filter4"]:
+		custom_activitiy_range.append((float(pair[0]),float(pair[1])))
+	if o["filter4"] == []:
 		filters["activities"] = False
 		#custom_activitiy_range = [(0,1)] #filter3
+
 	selected_viz = o["visualization"]
+	calc_lev = o["distance"]
 	input_file = os.path.join("webapp","static", req.session["id"] + "_l0.xes")
 	input_log = xes_importer.apply(input_file)
 	not_filtered_logs = {}
@@ -144,7 +154,7 @@ def apply_filter(req):
 
 		nr_variants = len(variants_count)
 		custom_path_range * nr_variants
-		idx = [(round(x*nr_variants), round(y*nr_variants)) for (x,y) in custom_path_range]
+		idx = [(math.floor(x*nr_variants), math.ceil(y*nr_variants)) for (x,y) in custom_path_range]
 		variants_subset = [variants_count[x:y+1] for (x,y) in idx]
 		variants_subset = flatten(variants_subset)
 		filtered_variants = {k:v for k,v in variants.items() if k in [x["variant"] for x in variants_subset]}
@@ -159,9 +169,39 @@ def apply_filter(req):
 
 	time_variants_finished = datetime.now() # note: incl log2 generation
 
+	if filters["performance"]:
+		custom_performance_range = sorted(custom_performance_range, reverse=False)
+		# check overlapping
+		for i in range(0,len(custom_performance_range)-1):
+			if(custom_performance_range[i][1] > custom_performance_range[i+1][0]):
+				raise ValueError("Overlapping performance ranges")
+
+		#all_case_durations = case_statistics.get_all_casedurations(log, parameters={case_statistics.Parameters.TIMESTAMP_KEY: "time:timestamp"})
+		#case_filter.filter_case_performance(log, 86400, 864000)
+		performances = []
+		for i in range(len(filtered_log)):
+			filtered_log[i].attributes["throughput"] = (max([event["time:timestamp"]for event in filtered_log[i]])-min([event["time:timestamp"] for event in filtered_log[i]])).total_seconds()
+			performances.append(filtered_log[i].attributes["throughput"])
+
+		nr_cases = len(filtered_log)
+		performances = sorted(performances, reverse=False)
+		idx = [(math.floor(x*nr_cases), math.ceil(y*nr_cases)) for (x,y) in custom_performance_range]
+		perf_subset = [performances[x:y+1] for (x,y) in idx]
+		perf_subset = flatten(perf_subset)
+
+		performance_log = pm4py.objects.log.log.EventLog([trace for trace in filtered_log if trace.attributes["throughput"] in perf_subset])
+		#l2
+		not_filtered_logs["performance_filter"] = pm4py.objects.log.log.EventLog([trace for trace in filtered_log if trace.attributes["throughput"] not in perf_subset])
+		#print(str(len(not_filtered_logs["performance_filter"])))
+
+	else:
+		performance_log = filtered_log
+
+	time_performance_finished = datetime.now()
+
 	if filters["activities"]:
-		variants = variants_filter.get_variants(filtered_log)
-		variants_count = case_statistics.get_variant_statistics(filtered_log)
+		variants = variants_filter.get_variants(performance_log)
+		variants_count = case_statistics.get_variant_statistics(performance_log)
 		variants_count = sorted(variants_count, key=lambda x: x['count'], reverse=False)
 
 		activities = dict()
@@ -180,7 +220,7 @@ def apply_filter(req):
 			if(custom_activitiy_range[i][1] > custom_activitiy_range[i+1][0]):
 				raise ValueError("Overlapping activities ranges")
 		nr_activities = len(activities_sorted_list)
-		idx = [(round(x*nr_activities), round(y*nr_activities)) for (x,y) in custom_activitiy_range]
+		idx = [(math.floor(x*nr_activities), math.ceil(y*nr_activities)) for (x,y) in custom_activitiy_range]
 		activities_to_keep = [activities_sorted_list[x:y+1] for (x,y) in idx]
 		activities_to_keep = flatten(activities_to_keep)
 		variants_idx = []
@@ -193,10 +233,10 @@ def apply_filter(req):
 		#l2
 		not_filtered_variants = {k:v for k,v in variants.items() if k not in [x["variant"] for x in variants_subset]}
 
-		filtered_log = variants_filter.apply(filtered_log, filtered_variants)
+		filtered_log = variants_filter.apply(performance_log, filtered_variants)
 
 		#l2
-		not_filtered_logs["activities_filter"] = variants_filter.apply(filtered_log, not_filtered_variants)
+		not_filtered_logs["activities_filter"] = variants_filter.apply(performance_log, not_filtered_variants)
 
 		new_log = pm4py.objects.log.log.EventLog()
 		#not_filtered_logs["activities_filter_traces"] = pm4py.objects.log.log.EventLog()
@@ -213,13 +253,17 @@ def apply_filter(req):
 			if(len(not_new_trace)>0):
 				not_filtered_logs["activities_filter"].append(not_new_trace)
 	else:
-		new_log = filtered_log
+		new_log = performance_log
 
 	time_activities_finished = datetime.now()
 
-	if(selected_viz=="dfg"):
+	if(selected_viz=="dfgf"):
 		dfg = dfg_discovery.apply(new_log)
 		gviz = dfg_visualization.apply(dfg, log=new_log, variant=dfg_visualization.Variants.FREQUENCY)
+		dfg_visualization.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l1.png"))
+	elif(selected_viz=="dfgp"):
+		dfg = dfg_discovery.apply(new_log)
+		gviz = dfg_visualization.apply(dfg, log=new_log, variant=dfg_visualization.Variants.PERFORMANCE)
 		dfg_visualization.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l1.png"))
 	else:
 		heu_net = heuristics_miner.apply_heu(new_log, parameters={"dependency_thresh": 0.99})
@@ -235,9 +279,13 @@ def apply_filter(req):
 		for trace in not_filtered_logs[part]:
 			not_filtered_log.append(trace)
 
-	if(selected_viz=="dfg"):
+	if(selected_viz=="dfgf"):
 		dfg = dfg_discovery.apply(not_filtered_log)
 		gviz = dfg_visualization.apply(dfg, log=not_filtered_log, variant=dfg_visualization.Variants.FREQUENCY)
+		dfg_visualization.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l2.png"))
+	elif(selected_viz=="dfgp"):
+		dfg = dfg_discovery.apply(not_filtered_log)
+		gviz = dfg_visualization.apply(dfg, log=not_filtered_log, variant=dfg_visualization.Variants.PERFORMANCE)
 		dfg_visualization.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l2.png"))
 	else:
 		heu_net = heuristics_miner.apply_heu(not_filtered_log, parameters={"dependency_thresh": 0.99})
@@ -245,13 +293,31 @@ def apply_filter(req):
 		hn_vis_factory.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l2.png"))
 	xes_exporter.apply(not_filtered_log, os.path.join("webapp","static", req.session["id"] + "_l2.xes"))
 
+	if(calc_lev):
+		lev_new = [0]*len(new_log)
+		for i in range(len(new_log)):
+			lev_new[i] = [event['concept:name'] for event in new_log[i]]
+
+		lev_not = [0]*len(not_filtered_log)
+		for i in range(len(not_filtered_log)):
+			lev_not[i] = [event['concept:name'] for event in not_filtered_log[i]]
+
+		distances = []
+		for i in range(len(lev_new)):
+			for j in range(len(lev_not)):
+				distances.append(lev_dist(lev_new[i], lev_not[j]))
+		lev_d = sum(distances)/len(distances)
+		print("Levenshtein's distance: "+str(lev_d))
+	else:
+		lev_d = "null"
+
 	used_paths = 0
 	for lower, higher in custom_path_range:
 		used_paths += round((higher-lower)*100)
 	print(f"Using {used_paths}% of paths. {100-used_paths}% of paths are discarded.")
 
 	print("Timestamp filter: {} seconds. \nVariants filter: {} seconds. \nActivities filter: {} seconds.".format((time_variants_started - time_timestamp_started).total_seconds(), (time_variants_finished - time_variants_started).total_seconds(), (time_activities_finished - time_variants_finished).total_seconds()))
-	response = HttpResponse(json.dumps({'time':(time_variants_started - time_timestamp_started).total_seconds(), 'variants':(time_variants_finished - time_variants_started).total_seconds(), 'activities':(time_activities_finished - time_variants_finished).total_seconds()}))
+	response = HttpResponse(json.dumps({'time':(time_variants_started - time_timestamp_started).total_seconds(), 'variants':(time_variants_finished - time_variants_started).total_seconds(), 'activities':(time_activities_finished - time_variants_finished).total_seconds(), 'traces':[len(new_log), len(not_filtered_log)], 'distance':lev_d}))
 	response.status_code = 200
 	return response
 

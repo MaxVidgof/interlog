@@ -8,8 +8,10 @@ RUN apt-get update \
 
 
 WORKDIR .
-COPY . .
+COPY ./requirements.txt .
 RUN pip install -r requirements.txt
+
+COPY . .
 
 #RUN ./run_locally.sh
 

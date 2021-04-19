@@ -10,27 +10,43 @@ export default class FilterContainer extends Component{
 			filter1: [],
 			filter2: [],
 			filter3: [],
-			visualization: "heu"
+			filter4: [],
+			visualization: "heu",
+			distance: 0
 		}
 		this.filter1 = new Filter(this.setFilter1.bind(this), "Time filter", "datetime-local", start, end);
 		this.filter2 = new Filter(this.setFilter2.bind(this), "Variants filter", "number");
-		this.filter3 = new Filter(this.setFilter3.bind(this), "Activities filter", "number");
+		this.filter3 = new Filter(this.setFilter3.bind(this), "Performance filter", "number");
+		this.filter4 = new Filter(this.setFilter4.bind(this), "Activities filter", "number");
+
 
 		this.viz = document.createElement("div");
 		this.viz_head = document.createElement("h3");
 		this.viz_head.innerText = "Select visualization";
 		this.viz.appendChild(this.viz_head);
 		this.viz.appendChild(document.createElement("br"));
-		this.viz_dfg = document.createElement("input");
-		this.viz_dfg.type="radio";
-		this.viz_dfg.name="viz";
-		this.viz_dfg.setAttribute('id', 'dfg');
-		this.viz.appendChild(this.viz_dfg);
-		this.l_dfg = document.createElement("label");
-		this.l_dfg.setAttribute("for", "dfg");
-		this.l_dfg.innerText = "Directly-follows-graph";
-		this.viz.appendChild(this.l_dfg);
+		this.viz_dfgf = document.createElement("input");
+		this.viz_dfgf.type="radio";
+		this.viz_dfgf.name="viz";
+		this.viz_dfgf.setAttribute('id', 'dfgf');
+		this.viz.appendChild(this.viz_dfgf);
+		this.l_dfgf = document.createElement("label");
+		this.l_dfgf.setAttribute("for", "dfgf");
+		this.l_dfgf.innerText = "Directly-follows-graph (frequency)";
+		this.viz.appendChild(this.l_dfgf);
 		this.viz.appendChild(document.createElement("br"));
+
+		this.viz_dfgp = document.createElement("input");
+		this.viz_dfgp.type="radio";
+		this.viz_dfgp.name="viz";
+		this.viz_dfgp.setAttribute('id', 'dfgp');
+		this.viz.appendChild(this.viz_dfgp);
+		this.l_dfgp = document.createElement("label");
+		this.l_dfgp.setAttribute("for", "dfgp");
+		this.l_dfgp.innerText = "Directly-follows-graph (performance)";
+		this.viz.appendChild(this.l_dfgp);
+		this.viz.appendChild(document.createElement("br"));
+
                 this.viz_heu = document.createElement("input");
                 this.viz_heu.type="radio";
 		this.viz_heu.name="viz";
@@ -41,7 +57,18 @@ export default class FilterContainer extends Component{
                 this.l_heu.setAttribute("for", "heu");
 		this.l_heu.innerText = "Heuristics miner";
                 this.viz.appendChild(this.l_heu);
+		this.viz.appendChild(document.createElement("br"));
 
+		this.lev = document.createElement("input")
+		this.lev.type = "checkbox"
+		this.lev.name = "lev"
+		this.lev.setAttribute('id', 'lev')
+		this.viz.appendChild(this.lev)
+		this.l_lev = document.createElement("label")
+		this.l_lev.setAttribute('for', 'lev')
+		this.l_lev.innetText = "Calculate Levenshteins distance" && console.log("here")
+		this.viz.appendChild(this.l_lev)
+		this.viz.appendChild(document.createElement("br"));
 
 		this.applyBtn = document.createElement("button");
 		this.applyBtn.innerText = "Apply";
@@ -58,10 +85,15 @@ export default class FilterContainer extends Component{
 //    }
 //}
 //if (filtersOk) {
-if (this.viz_dfg.checked) {
-	this.filterSettings.visualization = "dfg";
+if (this.viz_dfgf.checked) {
+	this.filterSettings.visualization = "dfgf";
+} else if (this.viz_dfgp.checked) {
+	this.filterSettings.visualization = "dfgp";
 } else {
 	this.filterSettings.visualization = "heu;"
+}
+if (this.lev.checked) {
+	this.filterSettings.distance = 1
 }
 let data = JSON.stringify(this.filterSettings)
 //                data.append('input_log_file', input.files[0])
@@ -71,6 +103,9 @@ let data = JSON.stringify(this.filterSettings)
 				console.log("Time filter: " + data.time + " seconds")
 				console.log("Variants filter: " + data.variants + " seconds")
 				console.log("Activities filter: " + data.activities + " seconds")
+				document.getElementById('model_1').children[0].children[0].innerText = "Traces: "+data.traces[0]
+				document.getElementById('model_2').children[0].children[0].innerText = "Traces: "+data.traces[1]
+				console.log("Average Levenshtein's distance: "+data.distance)
 				onApplyPushed("applied");
 			});
 //			fetch().then(() => {onApplyPushed()});
@@ -96,11 +131,15 @@ console.log(this.filterSettings)
 	setFilter3(intervals){
 		this.filterSettings.filter3 = intervals
 	}
+	setFilter4(intervals){
+		this.filterSettings.filter4 = intervals
+	}
 
 	render(parent){
 		super.render(parent)
 		this.filter1.render(this.filters)
 		this.filter2.render(this.filters)
 		this.filter3.render(this.filters)
+		this.filter4.render(this.filters)
 	}
 }
