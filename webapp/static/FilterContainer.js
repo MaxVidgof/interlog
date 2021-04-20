@@ -64,10 +64,10 @@ export default class FilterContainer extends Component{
 		this.lev.name = "lev"
 		this.lev.setAttribute('id', 'lev')
 		this.viz.appendChild(this.lev)
-		this.l_lev = document.createElement("label")
-		this.l_lev.setAttribute('for', 'lev')
-		this.l_lev.innetText = "Calculate Levenshteins distance" && console.log("here")
-		this.viz.appendChild(this.l_lev)
+		this.l_lev = document.createElement("label");
+		this.l_lev.setAttribute("for", "lev");
+		this.l_lev.innerText = "Calculate Levenshtein's distance";
+		this.viz.appendChild(this.l_lev);
 		this.viz.appendChild(document.createElement("br"));
 
 		this.applyBtn = document.createElement("button");
