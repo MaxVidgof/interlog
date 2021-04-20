@@ -60,6 +60,11 @@ def upload_log(req):
 	#Find minimum and maximum timestamps
 	start_time = min([event["time:timestamp"] for trace in log for event in trace])
 	end_time = max([event["time:timestamp"] for trace in log for event in trace]) + timedelta(seconds=1)
+	flatten = lambda l: [item for sublist in l for item in sublist]
+	trace_attributes = set(flatten([trace.attributes.keys() for trace in log])).difference(['concept:name'])
+	event_attributes = set(flatten([event.keys() for trace in log for event in trace])).difference(['concept:name', 'time:timestamp'])
+	print(trace_attributes)
+	print(event_attributes)
 	response = HttpResponse(json.dumps({'start_time': start_time, 'end_time': end_time}, sort_keys=True, indent=1, cls=DjangoJSONEncoder))
 	response.status_code = 200
 	return response
@@ -296,11 +301,11 @@ def apply_filter(req):
 	if(calc_lev):
 		lev_new = [0]*len(new_log)
 		for i in range(len(new_log)):
-			lev_new[i] = [event['concept:name'] for event in new_log[i]]
+			lev_new[i] = [hash(event['concept:name']) for event in new_log[i]]
 
 		lev_not = [0]*len(not_filtered_log)
 		for i in range(len(not_filtered_log)):
-			lev_not[i] = [event['concept:name'] for event in not_filtered_log[i]]
+			lev_not[i] = [hash(event['concept:name']) for event in not_filtered_log[i]]
 
 		distances = []
 		for i in range(len(lev_new)):

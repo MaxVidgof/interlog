@@ -70,6 +70,11 @@ export default class FilterContainer extends Component{
 		this.viz.appendChild(this.l_lev);
 		this.viz.appendChild(document.createElement("br"));
 
+		this.loader = document.createElement("div");
+		this.loader.setAttribute('id', 'loader');
+		this.loader.style.display = "none";
+		this.viz.appendChild(this.loader);
+
 		this.applyBtn = document.createElement("button");
 		this.applyBtn.innerText = "Apply";
 		this.applyBtn.setAttribute('class', 'btn btn-primary')
@@ -85,6 +90,7 @@ export default class FilterContainer extends Component{
 //    }
 //}
 //if (filtersOk) {
+document.getElementById("loader").style.display = "block";
 if (this.viz_dfgf.checked) {
 	this.filterSettings.visualization = "dfgf";
 } else if (this.viz_dfgp.checked) {
@@ -105,6 +111,7 @@ let data = JSON.stringify(this.filterSettings)
 				console.log("Activities filter: " + data.activities + " seconds")
 				document.getElementById('model_1').children[0].children[0].innerText = "Traces: "+data.traces[0]
 				document.getElementById('model_2').children[0].children[0].innerText = "Traces: "+data.traces[1]
+				document.getElementById("loader").style.display = "none";
 				console.log("Average Levenshtein's distance: "+data.distance)
 				onApplyPushed("applied");
 			});
