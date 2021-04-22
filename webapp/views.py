@@ -321,8 +321,8 @@ def apply_filter(req):
 		used_paths += round((higher-lower)*100)
 	print(f"Using {used_paths}% of paths. {100-used_paths}% of paths are discarded.")
 
-	print("Timestamp filter: {} seconds. \nVariants filter: {} seconds. \nActivities filter: {} seconds.".format((time_variants_started - time_timestamp_started).total_seconds(), (time_variants_finished - time_variants_started).total_seconds(), (time_activities_finished - time_variants_finished).total_seconds()))
-	response = HttpResponse(json.dumps({'time':(time_variants_started - time_timestamp_started).total_seconds(), 'variants':(time_variants_finished - time_variants_started).total_seconds(), 'activities':(time_activities_finished - time_variants_finished).total_seconds(), 'traces':[len(new_log), len(not_filtered_log)], 'distance':lev_d}))
+	print("Timestamp filter: {} seconds. \nVariants filter: {} seconds. \nPerformance filter: {} seconds. \nActivities filter: {} seconds.".format((time_variants_started - time_timestamp_started).total_seconds(), (time_variants_finished - time_variants_started).total_seconds(), (time_performance_finished - time_variants_finished).total_seconds(), (time_activities_finished - time_performance_finished).total_seconds()))
+	response = HttpResponse(json.dumps({'time':(time_variants_started - time_timestamp_started).total_seconds(), 'variants':(time_variants_finished - time_variants_started).total_seconds(),'performance':(time_performance_finished - time_variants_finished).total_seconds(), 'activities':(time_activities_finished - time_performance_finished).total_seconds(), 'traces':[len(new_log), len(not_filtered_log)], 'distance':lev_d}))
 	response.status_code = 200
 	return response
 

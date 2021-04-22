@@ -108,6 +108,7 @@ let data = JSON.stringify(this.filterSettings)
 				if (data.status && data.status==="expired"){ alert("Session expired. Please reload the page.");}
 				console.log("Time filter: " + data.time + " seconds")
 				console.log("Variants filter: " + data.variants + " seconds")
+				console.log("Performance filter: " + data.performance + " seconds")
 				console.log("Activities filter: " + data.activities + " seconds")
 				document.getElementById('model_1').children[0].children[0].innerText = "Traces: "+data.traces[0]
 				document.getElementById('model_2').children[0].children[0].innerText = "Traces: "+data.traces[1]
