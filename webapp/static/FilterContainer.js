@@ -66,7 +66,7 @@ export default class FilterContainer extends Component{
 		this.viz.appendChild(this.lev)
 		this.l_lev = document.createElement("label");
 		this.l_lev.setAttribute("for", "lev");
-		this.l_lev.innerText = "Calculate Levenshtein's distance";
+		this.l_lev.innerText = "Calculate Levenshtein's distance (may take some time)";
 		this.viz.appendChild(this.l_lev);
 		this.viz.appendChild(document.createElement("br"));
 
@@ -103,7 +103,7 @@ if (this.lev.checked) {
 }
 let data = JSON.stringify(this.filterSettings)
 //                data.append('input_log_file', input.files[0])
-	                fetch("https://cherry-picker.cluster.ai.wu.ac.at/apply", {method: 'POST', body: data}).then((response => {return response.json()})).then((data) => {
+	                fetch("https://interlog.cluster.ai.wu.ac.at/apply", {method: 'POST', body: data}).then((response => {return response.json()})).then((data) => {
 //console.log(data)
 				if (data.status && data.status==="expired"){ alert("Session expired. Please reload the page.");}
 				console.log("Time filter: " + data.time + " seconds")
