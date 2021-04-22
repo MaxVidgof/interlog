@@ -54,7 +54,7 @@ rightPart.render(root);
 m1.render(rightPart.root);
 m2.render(rightPart.root);
 
-
+document.getElementById('model_0').children[0].children[0].innerText = "Traces: "+data.traces_u
 console.log(data.start_time);
 console.log(data.end_time);
 
