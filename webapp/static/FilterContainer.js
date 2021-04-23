@@ -106,6 +106,10 @@ let data = JSON.stringify(this.filterSettings)
 	                fetch("https://interlog.cluster.ai.wu.ac.at/apply", {method: 'POST', body: data}).then((response => {return response.json()})).then((data) => {
 //console.log(data)
 				if (data.status && data.status==="expired"){ alert("Session expired. Please reload the page.");}
+				if (data.error) {
+					document.getElementById("loader").style.display = "none";
+					alert("Error: "+data.error);
+				}
 				console.log("Time filter: " + data.time + " seconds")
 				console.log("Variants filter: " + data.variants + " seconds")
 				console.log("Performance filter: " + data.performance + " seconds")

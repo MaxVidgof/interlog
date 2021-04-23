@@ -122,7 +122,10 @@ def apply_filter(req):
 		custom_time_range = sorted(custom_time_range, reverse=False)
 		for i in range(0,len(custom_time_range)-1):
 			if(custom_time_range[i][1] > custom_time_range[i+1][0]):
-				raise ValueError("Overlapping time ranges")
+				response = HttpResponse(json.dumps({'error': "Wrong intervals for time filter"}))
+				response.status_code = 200
+				return response
+				#raise ValueError("Overlapping time ranges")
 
 		logs = []
 		for (x,y) in custom_time_range:
@@ -155,7 +158,10 @@ def apply_filter(req):
 		# check overlapping
 		for i in range(0,len(custom_path_range)-1):
 			if(custom_path_range[i][1] > custom_path_range[i+1][0]):
-				raise ValueError("Overlapping variants ranges")
+				response = HttpResponse(json.dumps({'error': "Wrong intervals for variants filter"}))
+				response.status_code = 200
+				return response
+				#raise ValueError("Overlapping variants ranges")
 
 		nr_variants = len(variants_count)
 		custom_path_range * nr_variants
@@ -179,7 +185,10 @@ def apply_filter(req):
 		# check overlapping
 		for i in range(0,len(custom_performance_range)-1):
 			if(custom_performance_range[i][1] > custom_performance_range[i+1][0]):
-				raise ValueError("Overlapping performance ranges")
+				response = HttpResponse(json.dumps({'error': "Wrong intervals for performance filter"}))
+				response.status_code = 200
+				return response
+				#raise ValueError("Overlapping performance ranges")
 
 		#all_case_durations = case_statistics.get_all_casedurations(log, parameters={case_statistics.Parameters.TIMESTAMP_KEY: "time:timestamp"})
 		#case_filter.filter_case_performance(log, 86400, 864000)
@@ -223,7 +232,10 @@ def apply_filter(req):
 		# check overlapping
 		for i in range(0,len(custom_activitiy_range)-1):
 			if(custom_activitiy_range[i][1] > custom_activitiy_range[i+1][0]):
-				raise ValueError("Overlapping activities ranges")
+				response = HttpResponse(json.dumps({'error': "Wrong intervals for activities filter"}))
+				response.status_code = 200
+				return response
+				#raise ValueError("Overlapping activities ranges")
 		nr_activities = len(activities_sorted_list)
 		idx = [(math.floor(x*nr_activities), math.ceil(y*nr_activities)) for (x,y) in custom_activitiy_range]
 		activities_to_keep = [activities_sorted_list[x:y+1] for (x,y) in idx]
