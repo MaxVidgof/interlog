@@ -20,7 +20,7 @@ export default class FilterContainer extends Component{
 		this.filter2 = new Filter(this.setFilter2.bind(this), "Variants filter", "number", "From least frequent (0) to most frequent (1)", 0, 1);
 		this.filter3 = new Filter(this.setFilter3.bind(this), "Performance filter", "number", "From fastest (0) to slowest (1)", 0, 1);
 		this.filter4 = new Filter(this.setFilter4.bind(this), "Activities filter", "number", "From least frequent (0) to most frequent (1)", 0, 1);
-		this.filter5 = new Filter(this.setFilter5.bind(this), "Additional filter", "number", "Smallest value (0) to largest (1) if numeric; else if string", 0, 1 );
+		this.filter5 = new Filter(this.setFilter5.bind(this), "Additional filter", "number", "Smallest existing value to largest if numeric; least frequent (0) to most frequent (1) if string", 0, 1 );
 
 
 		this.viz = document.createElement("div");
