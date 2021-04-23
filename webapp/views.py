@@ -62,15 +62,29 @@ def upload_log(req):
 	end_time = max([event["time:timestamp"] for trace in log for event in trace]) + timedelta(seconds=1)
 	flatten = lambda l: [item for sublist in l for item in sublist]
 	trace_attributes = list(set(flatten([trace.attributes.keys() for trace in log])).difference(['concept:name']))
+
+	trace_attributes = [{'name':attribute, 'level':'trace'} for attribute in trace_attributes]
+	for i in range(len(trace_attributes)):
+		trace_attributes[i]['min'] = min([trace.attributes[trace_attributes[i]['name']] for trace in log if trace_attributes[i]['name'] in trace.attributes.keys()])
+		trace_attributes[i]['max'] = max([trace.attributes[trace_attributes[i]['name']] for trace in log if trace_attributes[i]['name'] in trace.attributes.keys()])
+		trace_attributes[i]['type'] = type(trace_attributes[i]['min']).__name__
+		if trace_attributes[i]['type']=='str':
+			trace_attributes[i]['min']=0
+			trace_attributes[i]['max']=1
+
+	trace_attributes = [attribute for attribute in trace_attributes if attribute['type'] != 'bool']
+
 	event_attributes = list(set(flatten([event.keys() for trace in log for event in trace])).difference(['concept:name', 'time:timestamp']))
-	event_attributes = [{'name':attribute} for attribute in event_attributes]
+	event_attributes = [{'name':attribute, 'level':'event'} for attribute in event_attributes]
 	for i in range(len(event_attributes)):
-		#if event_attributes[i]['type'] == int or event_attributes[i]['type'] == float:
 		event_attributes[i]['min'] = min([event[event_attributes[i]['name']] for trace in log for event in trace if event_attributes[i]['name'] in event.keys()])
 		event_attributes[i]['max'] = max([event[event_attributes[i]['name']] for trace in log for event in trace if event_attributes[i]['name'] in event.keys()])
 		event_attributes[i]['type'] = type(event_attributes[i]['min']).__name__
-		#else:
-		#	pass
+		if event_attributes[i]['type']=='str':
+			event_attributes[i]['min']=0
+			event_attributes[i]['max']=1
+
+	event_attributes = [attribute for attribute in event_attributes if attribute['type'] != 'bool']
 
 	print(trace_attributes)
 	print(event_attributes)
@@ -85,7 +99,8 @@ def apply_filter(req):
 		"time": True,
 		"variants": True,
 		"performance": True,
-		"activities": True
+		"activities": True,
+		"attribute": True
 	}
 	req.session.set_expiry(7200)
 	#print(str(req.body))
@@ -117,6 +132,12 @@ def apply_filter(req):
 	if o["filter4"] == []:
 		filters["activities"] = False
 		#custom_activitiy_range = [(0,1)] #filter3
+	custom_attribute_range = []
+	for pair in o["filter5"]:
+		custom_attribute_range.append((float(pair[0]),float(pair[1])))
+	if o["filter5"] == [] or o["filter5attribute"] == "Empty":
+		filters["attribute"] = False
+	additional_attribute = o["filter5attribute"]
 
 	selected_viz = o["visualization"]
 	calc_lev = o["distance"]
@@ -283,20 +304,123 @@ def apply_filter(req):
 
 	time_activities_finished = datetime.now()
 
+	if filters["attribute"]:
+		custom_attribute_range = sorted(custom_attribute_range, reverse=False)
+		# check overlapping
+		for i in range(0,len(custom_attribute_range)-1):
+			if(custom_attribute_range[i][1] > custom_attribute_range[i+1][0]):
+				response = HttpResponse(json.dumps({'error': "Wrong intervals for additional attribute filter"}))
+				response.status_code = 200
+				return response
+
+		newest_log = pm4py.objects.log.log.EventLog()
+		not_filtered_logs["additional_filter"] = pm4py.objects.log.log.EventLog()
+
+		traces_with_attr = []
+		not_traces_with_attr = []
+		for trace in new_log:
+			if additional_attribute in trace.attributes.keys():
+				traces_with_attr.append(trace)
+			else:
+				not_traces_with_attr.append(trace)
+		#check if trace attribute
+		if len(traces_with_attr)>0:
+			#check if numeric
+			if type(traces_with_attr[0].attributes[additional_attribute]) in [int, float]:
+				for trace in traces_with_attr:
+					if any([trace.attributes[additional_attribute] >= x and trace.attributes[additional_attribute] <= y for (x,y) in custom_attribute_range]):
+						newest_log.append(trace)
+					else:
+						not_filtered_logs["additional_filter"].append(trace)
+				for trace in not_traces_with_attr:
+					not_filtered_logs["additional_filter"].append(trace)
+			else: #string
+				attribute_frequencies = dict()
+				for trace in traces_with_attr:
+					if additional_attribute not in attribute_frequencies.keys():
+						attribute_frequencies[trace[additional_attribute]] = 0
+					attribute_frequencies[trace[additional_attribute]] += 1
+
+				sorted_frequencies = {k: v for k, v in sorted(attribute_frequencies.items(), key=lambda item: item[1])}
+				frequencies_sorted_list = list(sorted_frequencies)
+
+				nr_values = len(freqiencies_sorted_list)
+				idx = [(math.floor(x*nr_values), math.ceil(y*nr_values)) for (x,y) in custom_attribute_range]
+				values_to_keep = [frequencies_sorted_list[x:y+1] for (x,y) in idx]
+				values_to_keep = flatten(values_to_keep)
+
+				for trace in traces_with_attr:
+					if trace.attributes[additional_attribute] in values_to_keep:
+						newest_log.append(trace)
+					else:
+						not_filtered_logs["additional_filter"].append(trace)
+				for trace in not_traces_with_attr:
+					not_filtered_logs["additional_filter"].append(trace)
+
+		else: #event attribute
+			if [type(event[additional_attribute]) for trace in new_log for event in trace if additional_attribute in event.keys()][0] in [int, float]:
+				for trace in new_log:
+					new_trace = pm4py.objects.log.log.Trace()
+					not_new_trace = pm4py.objects.log.log.Trace()
+					for event in trace:
+						if(additional_attribute in event.keys() and any([event[additional_attribute] >= x and event[additional_attribute] <= y for (x,y) in custom_attribute_range ])):
+							new_trace.append(event)
+						else:
+							not_new_trace.append(event)
+					if(len(new_trace)>0):
+						newest_log.append(new_trace)
+					if(len(not_new_trace)>0):
+						not_filtered_logs["additional_filter"].append(not_new_trace)
+			else: #string
+				attribute_frequencies = dict()
+				for trace in new_log:
+					for event in trace:
+						if additional_attribute in event.keys():
+							if additional_attribute not in attribute_frequencies.keys():
+								attribute_frequencies[event[additional_attribute]] = 0
+							attribute_frequencies[event[additional_attribute]] += 1
+
+				sorted_frequencies = {k: v for k, v in sorted(attribute_frequencies.items(), key=lambda item: item[1])}
+				frequencies_sorted_list = list(sorted_frequencies)
+
+				nr_values = len(frequencies_sorted_list)
+				idx = [(math.floor(x*nr_values), math.ceil(y*nr_values)) for (x,y) in custom_attribute_range]
+				values_to_keep = [frequencies_sorted_list[x:y+1] for (x,y) in idx]
+				values_to_keep = flatten(values_to_keep)
+
+				for trace in new_log:
+					new_trace = pm4py.objects.log.log.Trace()
+					not_new_trace = pm4py.objects.log.log.Trace()
+					for event in trace:
+						if(additional_attribute in event.keys() and event[additional_attribute] in values_to_keep):
+							new_trace.append(event)
+						else:
+							not_new_trace.append(event)
+					if(len(new_trace)>0):
+						newest_log.append(new_trace)
+					if(len(not_new_trace)>0):
+						not_filtered_logs["additional_filter"].append(not_new_trace)
+
+
+	else:
+		newest_log = new_log
+
+	time_attribute_finished = datetime.now()
+
 	if(selected_viz=="dfgf"):
-		dfg = dfg_discovery.apply(new_log)
-		gviz = dfg_visualization.apply(dfg, log=new_log, variant=dfg_visualization.Variants.FREQUENCY)
+		dfg = dfg_discovery.apply(newest_log)
+		gviz = dfg_visualization.apply(dfg, log=newest_log, variant=dfg_visualization.Variants.FREQUENCY)
 		dfg_visualization.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l1.png"))
 	elif(selected_viz=="dfgp"):
-		dfg = dfg_discovery.apply(new_log)
-		gviz = dfg_visualization.apply(dfg, log=new_log, variant=dfg_visualization.Variants.PERFORMANCE)
+		dfg = dfg_discovery.apply(newest_log)
+		gviz = dfg_visualization.apply(dfg, log=newest_log, variant=dfg_visualization.Variants.PERFORMANCE)
 		dfg_visualization.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l1.png"))
 	else:
-		heu_net = heuristics_miner.apply_heu(new_log, parameters={"dependency_thresh": 0.99})
+		heu_net = heuristics_miner.apply_heu(newest_log, parameters={"dependency_thresh": 0.99})
 		gviz = hn_vis_factory.apply(heu_net)
 		hn_vis_factory.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l1.png"))
 
-	xes_exporter.apply(new_log, os.path.join("webapp","static", req.session["id"] + "_l1.xes"))
+	xes_exporter.apply(newest_log, os.path.join("webapp","static", req.session["id"] + "_l1.xes"))
 
 
 	#l2
@@ -320,9 +444,9 @@ def apply_filter(req):
 	xes_exporter.apply(not_filtered_log, os.path.join("webapp","static", req.session["id"] + "_l2.xes"))
 
 	if(calc_lev):
-		lev_new = [0]*len(new_log)
-		for i in range(len(new_log)):
-			lev_new[i] = [hash(event['concept:name']) for event in new_log[i]]
+		lev_new = [0]*len(newest_log)
+		for i in range(len(newest_log)):
+			lev_new[i] = [hash(event['concept:name']) for event in newest_log[i]]
 
 		lev_not = [0]*len(not_filtered_log)
 		for i in range(len(not_filtered_log)):
@@ -342,8 +466,8 @@ def apply_filter(req):
 		used_paths += round((higher-lower)*100)
 	print(f"Using {used_paths}% of paths. {100-used_paths}% of paths are discarded.")
 
-	print("Timestamp filter: {} seconds. \nVariants filter: {} seconds. \nPerformance filter: {} seconds. \nActivities filter: {} seconds.".format((time_variants_started - time_timestamp_started).total_seconds(), (time_variants_finished - time_variants_started).total_seconds(), (time_performance_finished - time_variants_finished).total_seconds(), (time_activities_finished - time_performance_finished).total_seconds()))
-	response = HttpResponse(json.dumps({'time':(time_variants_started - time_timestamp_started).total_seconds(), 'variants':(time_variants_finished - time_variants_started).total_seconds(),'performance':(time_performance_finished - time_variants_finished).total_seconds(), 'activities':(time_activities_finished - time_performance_finished).total_seconds(), 'traces':[len(new_log), len(not_filtered_log)], 'distance':lev_d}))
+	print("Timestamp filter: {} seconds. \nVariants filter: {} seconds. \nPerformance filter: {} seconds. \nActivities filter: {} seconds. \nAttribute filter: {} seconds.".format((time_variants_started - time_timestamp_started).total_seconds(), (time_variants_finished - time_variants_started).total_seconds(), (time_performance_finished - time_variants_finished).total_seconds(), (time_activities_finished - time_performance_finished).total_seconds(), (time_attribute_finished - time_activities_finished).total_seconds()))
+	response = HttpResponse(json.dumps({'time':(time_variants_started - time_timestamp_started).total_seconds(), 'variants':(time_variants_finished - time_variants_started).total_seconds(),'performance':(time_performance_finished - time_variants_finished).total_seconds(), 'activities':(time_activities_finished - time_performance_finished).total_seconds(), 'attribute':(time_attribute_finished - time_activities_finished).total_seconds(), 'traces':[len(newest_log), len(not_filtered_log)], 'distance':lev_d}))
 	response.status_code = 200
 	return response
 

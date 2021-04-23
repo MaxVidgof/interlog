@@ -1,11 +1,12 @@
 import Component from './Component.js';
+import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
  
 export default class Slider extends Component {
 	constructor(onDeletePressed, onChange, type, start, end) {
 		super();
 		this.type = type
 //		this.div = document.createElement('div');
-		this.id = Date.now();
+		this.id = Date.now().toString()+uuidv4();
 		this.root.setAttribute('id', this.id);
 		this.root.setAttribute('class','form-group')
 //		this.root.appendChild(this.div);
@@ -50,8 +51,13 @@ export default class Slider extends Component {
 				this.leftSlider.value = (new Date(val+"Z")) - (new Date(this.min));
 			}
 		} else {
-			this.leftInput.value = val;
-			this.leftSlider.value = val;
+			if((val >= this.min ) && (val <=this. max)){
+				this.leftInput.value = val;
+				this.leftSlider.value = val;
+			} else {
+				this.leftInput.value = this.min;
+				this.leftSlider.value = this.min;
+			}
 		}
 //		this.left = val;
 		this.onChange()
@@ -68,14 +74,39 @@ export default class Slider extends Component {
 				this.rightSlider.value = (new Date(val+"Z")) - (new Date(this.min));
 			}
 		} else {
-			this.rightInput.value = val;
-			this.rightSlider.value = val;
+			if((val >=this.min ) && (val <= this.max)){
+				this.rightInput.value = val;
+				this.rightSlider.value = val;
+			} else {
+				this.rightInput.value = this.max;
+				this.rightSlider.value = this.max;
+			}
 		}
 
 		this.onChange()
 //		this.right = val;
 		// slider
 	}
+	set lower (val) {
+		this.min = val;
+		this.leftInput.min = val;
+		this.leftSlider.min = val;
+		this.rightInput.min = val;
+		this.rightSlider.min = val;
+		this.left = this.min;
+		this.right = this.max;
+	}
+
+	set upper (val) {
+		this.max = val;
+		this.leftInput.max = val;
+		this.leftSlider.max = val;
+		this.rightInput.max = val;
+		this.rightSlider.max = val;
+		this.left = this.min;
+		this.right = this.max;
+	}
+
 	createField(field, side){
 		field.required=true;
 		field.min = this.min;

@@ -9,8 +9,18 @@ const modalImg = document.getElementById("modal-img");
 const baseUrl = document.getElementById("baseUrl").value;
 const button = document.getElementById("upload_btn");
 const input = document.getElementById("log_file");
+
+
+const loader = document.createElement("div");
+loader.setAttribute('id', 'loader');
+loader.style.display = "none";
+document.body.appendChild(loader);
+
 button.addEventListener("click", () => {
+
 	if(input.files.length>0){
+		loader.style.display = "block";
+//		document.getElementById("loader").style.display = "block";
 		let data = new FormData()
 		data.append('input_log_file', input.files[0])
 		fetch("https://interlog.cluster.ai.wu.ac.at/upload", {method: 'POST', body: data}).then((response) => {return response.json()}).then((data) => {
@@ -63,12 +73,19 @@ let all_attributes = [...data.trace_attributes]
 all_attributes.push(...data.event_attributes)
 let attributes = "<option value='Empty'>Empty</option>"
 for (let attribute of all_attributes){
-	attributes+="<option value='"+attribute.name+"'>"+attribute.name+" --- "+attribute.type+"</option>"
+	attributes+="<option value='"+attribute.name+"'>"+attribute.level+": "+attribute.name+" --- "+attribute.type+"</option>"
 }
 document.getElementsByClassName('filter')[4].children[0].innerHTML = document.getElementsByClassName('filter')[4].children[0].innerHTML.replace("Additional", "<select id='filter5'>"+attributes+"</select>")
 document.getElementById('filter5').addEventListener('change', (event) => {
 	const params = all_attributes.find((param) => param.name === event.target.value )
-	
+	if (!params) {
+		f.filter5.sliders.filter((v,idx) => idx).forEach((element) => element.remove)
+		f.filter5.sliders = f.filter5.sliders.filter((v,idx) => !idx)
+		f.filter5.sliders[0].lower=0
+		f.filter5.sliders[0].upper=1
+		return;
+	}
+	f.filter5.sliders.forEach((slider) => {slider.lower=params.min; slider.upper=params.max;})
 })
 document.getElementById('upload').remove()
 let span = document.getElementsByClassName("close")[0];
@@ -85,6 +102,7 @@ for (let image of document.getElementsByTagName("img")) {
 		}
 	}
 }
+document.getElementById("loader").style.display = "none";
 		});
 	}
 } );

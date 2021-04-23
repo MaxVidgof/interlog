@@ -73,10 +73,10 @@ export default class FilterContainer extends Component{
 		this.viz.appendChild(this.l_lev);
 		this.viz.appendChild(document.createElement("br"));
 
-		this.loader = document.createElement("div");
-		this.loader.setAttribute('id', 'loader');
-		this.loader.style.display = "none";
-		this.viz.appendChild(this.loader);
+//		this.loader = document.createElement("div");
+//		this.loader.setAttribute('id', 'loader');
+//		this.loader.style.display = "none";
+//		this.viz.appendChild(this.loader);
 
 		this.applyBtn = document.createElement("button");
 		this.applyBtn.innerText = "Apply";
