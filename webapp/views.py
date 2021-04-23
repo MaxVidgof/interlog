@@ -65,7 +65,7 @@ def upload_log(req):
 	event_attributes = set(flatten([event.keys() for trace in log for event in trace])).difference(['concept:name', 'time:timestamp'])
 	print(trace_attributes)
 	print(event_attributes)
-	response = HttpResponse(json.dumps({'start_time': start_time, 'end_time': end_time, 'traces_u':len(log)}, sort_keys=True, indent=1, cls=DjangoJSONEncoder))
+	response = HttpResponse(json.dumps({'start_time': start_time, 'end_time': end_time, 'traces_u':len(log), 'trace_attributes':list(trace_attributes), 'event_attributes':list(event_attributes)}, sort_keys=True, indent=1, cls=DjangoJSONEncoder))
 	response.status_code = 200
 	return response
 

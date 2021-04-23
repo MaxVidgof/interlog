@@ -11,6 +11,7 @@ export default class FilterContainer extends Component{
 			filter2: [],
 			filter3: [],
 			filter4: [],
+//			filter5: [],
 			visualization: "heu",
 			distance: 0
 		}
@@ -18,6 +19,7 @@ export default class FilterContainer extends Component{
 		this.filter2 = new Filter(this.setFilter2.bind(this), "Variants filter", "number");
 		this.filter3 = new Filter(this.setFilter3.bind(this), "Performance filter", "number");
 		this.filter4 = new Filter(this.setFilter4.bind(this), "Activities filter", "number");
+//		this.filter5 = new Filter(this.setFilter5.bind(this), "Additional filter", "number");
 
 
 		this.viz = document.createElement("div");
@@ -146,6 +148,9 @@ console.log(this.filterSettings)
 	setFilter4(intervals){
 		this.filterSettings.filter4 = intervals
 	}
+//	setFilter5(intervals){
+//		this.filterSettings.filter5 = intervals
+//	}
 
 	render(parent){
 		super.render(parent)
@@ -153,5 +158,6 @@ console.log(this.filterSettings)
 		this.filter2.render(this.filters)
 		this.filter3.render(this.filters)
 		this.filter4.render(this.filters)
+//		this.filter5.render(this.filters)
 	}
 }

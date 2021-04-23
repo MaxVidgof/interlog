@@ -57,6 +57,8 @@ m2.render(rightPart.root);
 document.getElementById('model_0').children[0].children[0].innerText = "Traces: "+data.traces_u
 console.log(data.start_time);
 console.log(data.end_time);
+console.log("Trace attributes: "+data.trace_attributes)
+console.log("Event attributes: "+data.event_attributes)
 
 document.getElementById('upload').remove()
 let span = document.getElementsByClassName("close")[0];
