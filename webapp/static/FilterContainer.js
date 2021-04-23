@@ -11,15 +11,16 @@ export default class FilterContainer extends Component{
 			filter2: [],
 			filter3: [],
 			filter4: [],
-//			filter5: [],
+			filter5: [],
+			filter5attribute: "Empty",
 			visualization: "heu",
 			distance: 0
 		}
-		this.filter1 = new Filter(this.setFilter1.bind(this), "Time filter", "datetime-local", start, end);
-		this.filter2 = new Filter(this.setFilter2.bind(this), "Variants filter", "number");
-		this.filter3 = new Filter(this.setFilter3.bind(this), "Performance filter", "number");
-		this.filter4 = new Filter(this.setFilter4.bind(this), "Activities filter", "number");
-//		this.filter5 = new Filter(this.setFilter5.bind(this), "Additional filter", "number");
+		this.filter1 = new Filter(this.setFilter1.bind(this), "Time filter", "datetime-local", "Time intervals", start, end);
+		this.filter2 = new Filter(this.setFilter2.bind(this), "Variants filter", "number", "From least frequent (0) to most frequent (1)", 0, 1);
+		this.filter3 = new Filter(this.setFilter3.bind(this), "Performance filter", "number", "From fastest (0) to slowest (1)", 0, 1);
+		this.filter4 = new Filter(this.setFilter4.bind(this), "Activities filter", "number", "From least frequent (0) to most frequent (1)", 0, 1);
+		this.filter5 = new Filter(this.setFilter5.bind(this), "Additional filter", "number", "Smallest value (0) to largest (1) if numeric; else if string", 0, 1 );
 
 
 		this.viz = document.createElement("div");
@@ -68,7 +69,7 @@ export default class FilterContainer extends Component{
 		this.viz.appendChild(this.lev)
 		this.l_lev = document.createElement("label");
 		this.l_lev.setAttribute("for", "lev");
-		this.l_lev.innerText = "Calculate Levenshtein's distance (may take some time)";
+		this.l_lev.innerText = "Calculate Levenshtein's distance (may take around 2 minutes)";
 		this.viz.appendChild(this.l_lev);
 		this.viz.appendChild(document.createElement("br"));
 
@@ -103,6 +104,7 @@ if (this.viz_dfgf.checked) {
 if (this.lev.checked) {
 	this.filterSettings.distance = 1
 }
+this.filterSettings.filter5attribute = document.getElementsByTagName('select')[0].value
 let data = JSON.stringify(this.filterSettings)
 //                data.append('input_log_file', input.files[0])
 	                fetch("https://interlog.cluster.ai.wu.ac.at/apply", {method: 'POST', body: data}).then((response => {return response.json()})).then((data) => {
@@ -148,9 +150,9 @@ console.log(this.filterSettings)
 	setFilter4(intervals){
 		this.filterSettings.filter4 = intervals
 	}
-//	setFilter5(intervals){
-//		this.filterSettings.filter5 = intervals
-//	}
+	setFilter5(intervals){
+		this.filterSettings.filter5 = intervals
+	}
 
 	render(parent){
 		super.render(parent)
@@ -158,6 +160,6 @@ console.log(this.filterSettings)
 		this.filter2.render(this.filters)
 		this.filter3.render(this.filters)
 		this.filter4.render(this.filters)
-//		this.filter5.render(this.filters)
+		this.filter5.render(this.filters)
 	}
 }

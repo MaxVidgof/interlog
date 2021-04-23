@@ -59,7 +59,17 @@ console.log(data.start_time);
 console.log(data.end_time);
 console.log("Trace attributes: "+data.trace_attributes)
 console.log("Event attributes: "+data.event_attributes)
-
+let all_attributes = [...data.trace_attributes]
+all_attributes.push(...data.event_attributes)
+let attributes = "<option value='Empty'>Empty</option>"
+for (let attribute of all_attributes){
+	attributes+="<option value='"+attribute.name+"'>"+attribute.name+" --- "+attribute.type+"</option>"
+}
+document.getElementsByClassName('filter')[4].children[0].innerHTML = document.getElementsByClassName('filter')[4].children[0].innerHTML.replace("Additional", "<select id='filter5'>"+attributes+"</select>")
+document.getElementById('filter5').addEventListener('change', (event) => {
+	const params = all_attributes.find((param) => param.name === event.target.value )
+	
+})
 document.getElementById('upload').remove()
 let span = document.getElementsByClassName("close")[0];
 // When the user clicks on <span> (x), close the modal

@@ -14,13 +14,13 @@ export default class Slider extends Component {
 		this.deleteBtn.innerText = '-';
 		this.deleteBtn.addEventListener('click', () => {onDeletePressed(this);});
 		this.root.appendChild(this.deleteBtn);
-		if (type==="datetime-local" && start !== undefined && end !== undefined){
+//		if (type==="datetime-local" && start !== undefined && end !== undefined){
 			this.min = start;
 			this.max = end;
-		} else {
-			this.min = 0;
-			this.max = 1;
-		}
+//		} else {
+//			this.min = 0;
+//			this.max = 1;
+//		}
 		this.leftInput = document.createElement('input');
 		this.createField(this.leftInput, 'left');
 		this.rightInput = document.createElement('input');

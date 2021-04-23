@@ -61,11 +61,20 @@ def upload_log(req):
 	start_time = min([event["time:timestamp"] for trace in log for event in trace])
 	end_time = max([event["time:timestamp"] for trace in log for event in trace]) + timedelta(seconds=1)
 	flatten = lambda l: [item for sublist in l for item in sublist]
-	trace_attributes = set(flatten([trace.attributes.keys() for trace in log])).difference(['concept:name'])
-	event_attributes = set(flatten([event.keys() for trace in log for event in trace])).difference(['concept:name', 'time:timestamp'])
+	trace_attributes = list(set(flatten([trace.attributes.keys() for trace in log])).difference(['concept:name']))
+	event_attributes = list(set(flatten([event.keys() for trace in log for event in trace])).difference(['concept:name', 'time:timestamp']))
+	event_attributes = [{'name':attribute} for attribute in event_attributes]
+	for i in range(len(event_attributes)):
+		#if event_attributes[i]['type'] == int or event_attributes[i]['type'] == float:
+		event_attributes[i]['min'] = min([event[event_attributes[i]['name']] for trace in log for event in trace if event_attributes[i]['name'] in event.keys()])
+		event_attributes[i]['max'] = max([event[event_attributes[i]['name']] for trace in log for event in trace if event_attributes[i]['name'] in event.keys()])
+		event_attributes[i]['type'] = type(event_attributes[i]['min']).__name__
+		#else:
+		#	pass
+
 	print(trace_attributes)
 	print(event_attributes)
-	response = HttpResponse(json.dumps({'start_time': start_time, 'end_time': end_time, 'traces_u':len(log), 'trace_attributes':list(trace_attributes), 'event_attributes':list(event_attributes)}, sort_keys=True, indent=1, cls=DjangoJSONEncoder))
+	response = HttpResponse(json.dumps({'start_time': start_time, 'end_time': end_time, 'traces_u':len(log), 'trace_attributes':trace_attributes, 'event_attributes':event_attributes}, sort_keys=True, indent=1, cls=DjangoJSONEncoder))
 	response.status_code = 200
 	return response
 

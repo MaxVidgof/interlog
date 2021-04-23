@@ -2,11 +2,17 @@ import Component from './Component.js';
 import Slider from './Slider.js';
 
 export default class Filter extends Component{
-	constructor(onChange, filterName, type, start, end){
+	constructor(onChange, filterName, type, desc, start, end){
 		super();
 		this.root.setAttribute('class', 'filter')
 		this.header = document.createElement("h3");
-		this.header.innerText = filterName;
+		this.header.innerText = filterName + " ";
+		this.inf = document.createElement('span')
+		this.inf.setAttribute('class', 'inf')
+		this.inf.innerText = " ⓘ"  //'&#9432;'
+		this.desc = document.createElement('span')
+		this.desc.setAttribute('class', 'tooltiptext')
+		this.desc.innerText = desc
 		this.sliders = [];
 		this.sliders = [new Slider(this.onDeletePressed.bind(this), () => {
 			onChange(this.intervals);
@@ -24,6 +30,8 @@ export default class Filter extends Component{
 			this.sliders[this.sliders.length -1].rightInput.value = this.sliders[0].rightInput.max
 			this.sliders[this.sliders.length -1].leftSlider.value = this.sliders[this.sliders.length - 2].rightSlider.value
 		});
+		this.inf.appendChild(this.desc)
+		this.header.appendChild(this.inf)
 		this.root.appendChild(this.header)
 		this.root.appendChild(this.addBtn)
 		//this.sliders.forEach(slider => slider.render(this.root))
