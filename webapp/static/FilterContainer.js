@@ -103,6 +103,8 @@ if (this.viz_dfgf.checked) {
 }
 if (this.lev.checked) {
 	this.filterSettings.distance = 1
+} else {
+	this.filterSettings.distance = 0
 }
 this.filterSettings.filter5attribute = document.getElementsByTagName('select')[0].value
 let data = JSON.stringify(this.filterSettings)
