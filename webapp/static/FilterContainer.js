@@ -122,6 +122,13 @@ let data = JSON.stringify(this.filterSettings)
 				document.getElementById('model_2').children[0].children[0].innerText = "Traces: "+data.traces[1]
 				document.getElementById("loader").style.display = "none";
 				console.log("Average Levenshtein's distance: "+data.distance)
+				if (data.distance) {
+					document.getElementById('lev_disp').style.display='block'
+					document.getElementById('lev_disp').innerText="Average Levenshtein's distance: "+data.distance
+				} else {
+					document.getElementById('lev_disp').style.display='none'
+					document.getElementById('lev_disp').innerText=''
+				}
 				onApplyPushed("applied");
 			});
 //			fetch().then(() => {onApplyPushed()});
@@ -136,6 +143,11 @@ console.log(this.filterSettings)
 		this.root.appendChild(this.filters)
 		this.root.appendChild(this.viz)
 		this.root.appendChild(this.applyBtn)
+
+		this.lev_disp = document.createElement('p')
+		this.lev_disp.setAttribute('id', 'lev_disp')
+		this.lev_disp.style.display = 'none'
+		this.root.appendChild(this.lev_disp)
 	}
 
 	setFilter1(intervals){
