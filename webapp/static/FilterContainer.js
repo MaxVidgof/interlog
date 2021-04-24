@@ -101,7 +101,7 @@ if (this.viz_dfgf.checked) {
 } else {
 	this.filterSettings.visualization = "heu;"
 }
-if (this.lev.checked) {
+if (document.getElementById('lev').checked) {
 	this.filterSettings.distance = 1
 } else {
 	this.filterSettings.distance = 0
@@ -124,7 +124,7 @@ let data = JSON.stringify(this.filterSettings)
 				document.getElementById('model_2').children[0].children[0].innerText = "Traces: "+data.traces[1]
 				document.getElementById("loader").style.display = "none";
 				console.log("Average Levenshtein's distance: "+data.distance)
-				if (data.distance) {
+				if (data.distance !== "null") {
 					document.getElementById('lev_disp').style.display='block'
 					document.getElementById('lev_disp').innerText="Average Levenshtein's distance: "+data.distance
 				} else {
