@@ -59,6 +59,9 @@ def upload_log(req):
 	hn_vis_factory.save(gviz, os.path.join("webapp","static", req.session["id"] + "_l0.png"))
 	#Find minimum and maximum timestamps
 	start_time = min([event["time:timestamp"] for trace in log for event in trace])
+	start_times_a = [event["start_timestamp"] for trace in log for event in trace if "start_timestamp" in event.keys()]
+	if len(start_times_a)>0:
+		start_time = min(start_time, min(start_times_a))
 	end_time = max([event["time:timestamp"] for trace in log for event in trace]) + timedelta(seconds=1)
 	flatten = lambda l: [item for sublist in l for item in sublist]
 	trace_attributes = list(set(flatten([trace.attributes.keys() for trace in log])).difference(['concept:name']))
@@ -338,13 +341,13 @@ def apply_filter(req):
 				attribute_frequencies = dict()
 				for trace in traces_with_attr:
 					if additional_attribute not in attribute_frequencies.keys():
-						attribute_frequencies[trace[additional_attribute]] = 0
-					attribute_frequencies[trace[additional_attribute]] += 1
+						attribute_frequencies[trace.attributes[additional_attribute]] = 0
+					attribute_frequencies[trace.attributes[additional_attribute]] += 1
 
 				sorted_frequencies = {k: v for k, v in sorted(attribute_frequencies.items(), key=lambda item: item[1])}
 				frequencies_sorted_list = list(sorted_frequencies)
 
-				nr_values = len(freqiencies_sorted_list)
+				nr_values = len(frequencies_sorted_list)
 				idx = [(math.floor(x*nr_values), math.ceil(y*nr_values)) for (x,y) in custom_attribute_range]
 				values_to_keep = [frequencies_sorted_list[x:y+1] for (x,y) in idx]
 				values_to_keep = flatten(values_to_keep)
