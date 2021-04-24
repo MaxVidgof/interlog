@@ -340,7 +340,7 @@ def apply_filter(req):
 			else: #string
 				attribute_frequencies = dict()
 				for trace in traces_with_attr:
-					if additional_attribute not in attribute_frequencies.keys():
+					if trace.attributes[additional_attribute] not in attribute_frequencies.keys():
 						attribute_frequencies[trace.attributes[additional_attribute]] = 0
 					attribute_frequencies[trace.attributes[additional_attribute]] += 1
 
@@ -379,7 +379,7 @@ def apply_filter(req):
 				for trace in new_log:
 					for event in trace:
 						if additional_attribute in event.keys():
-							if additional_attribute not in attribute_frequencies.keys():
+							if event[additional_attribute] not in attribute_frequencies.keys():
 								attribute_frequencies[event[additional_attribute]] = 0
 							attribute_frequencies[event[additional_attribute]] += 1
 
