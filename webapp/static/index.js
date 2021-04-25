@@ -18,7 +18,7 @@ document.body.appendChild(loader);
 
 button.addEventListener("click", () => {
 
-	if(input.files.length>0){
+//	if(input.files.length>0){
 		loader.style.display = "block";
 //		document.getElementById("loader").style.display = "block";
 		let data = new FormData()
@@ -104,5 +104,5 @@ for (let image of document.getElementsByTagName("img")) {
 }
 document.getElementById("loader").style.display = "none";
 		});
-	}
+//	}
 } );

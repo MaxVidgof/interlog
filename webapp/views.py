@@ -46,13 +46,14 @@ def check_session_id_or_redirect(func):
 
 @check_session_id_or_redirect
 def upload_log(req):
-	input_log_file = req.FILES["input_log_file"]
+	#input_log_file = req.FILES["input_log_file"]
 	sessions[req.session["id"]] = datetime.now()
 	req.session.set_expiry(7200) #7200 = 2hrs
 	subprocess.call(["rm", "-f", req.session["id"] + "_*"])
-	with open(os.path.join("webapp","static", req.session["id"] + "_l0.xes"), 'wb') as file:
-		file.write(input_log_file.read())
-	input_file = os.path.join("webapp","static", req.session["id"] + "_l0.xes")
+	#with open(os.path.join("webapp","static", req.session["id"] + "_l0.xes"), 'wb') as file:
+	#	file.write(input_log_file.read())
+	#input_file = os.path.join("webapp","static", req.session["id"] + "_l0.xes")
+	input_file = os.path.join("webapp","static", "sepsis.xes")
 	log = xes_importer.apply(input_file)
 	heu_net = heuristics_miner.apply_heu(log, parameters={"dependency_thresh": 0.99})
 	gviz = hn_vis_factory.apply(heu_net)
@@ -144,7 +145,8 @@ def apply_filter(req):
 
 	selected_viz = o["visualization"]
 	calc_lev = o["distance"]
-	input_file = os.path.join("webapp","static", req.session["id"] + "_l0.xes")
+	#input_file = os.path.join("webapp","static", req.session["id"] + "_l0.xes")
+	input_file = os.path.join("webapp","static", "sepsis.xes")
 	input_log = xes_importer.apply(input_file)
 	not_filtered_logs = {}
 	flatten = lambda l: [item for sublist in l for item in sublist]
