@@ -1,9 +1,7 @@
 FROM python:3.6
 
-FROM python:3.6
-
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends nano graphviz libgirepository1.0-dev \
+    && apt-get install -y --no-install-recommends nano graphviz libgirepository1.0-dev iproute2 \
     && rm -rf /var/lib/apt/lists/*
 
 
